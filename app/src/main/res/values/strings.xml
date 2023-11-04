@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">TestHS</string>
+    <string name="navigation_item_menu">Меню</string>
+    <string name="navigation_item_profile">Профиль</string>
+    <string name="navigation_item_cart">Корзина</string>
 </resources>
