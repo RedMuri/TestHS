@@ -55,6 +55,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.SubcomposeAsyncImage
@@ -108,18 +109,7 @@ fun MenuScreen(
         Headline()
         when (val currentState = state.value) {
             is ProductsScreenState.Loading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(LocalConfiguration.current.screenHeightDp.dp)
-                        .background(color = MaterialTheme.colorScheme.surface)
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(
-                            Alignment.Center
-                        )
-                    )
-                }
+                LoadingPlaceholder()
             }
 
             is ProductsScreenState.Content -> {
@@ -155,13 +145,29 @@ fun MenuScreen(
 }
 
 @Composable
+private fun LoadingPlaceholder() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(LocalConfiguration.current.screenHeightDp.dp)
+            .background(color = MaterialTheme.colorScheme.surface)
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.align(
+                Alignment.Center
+            )
+        )
+    }
+}
+
+@Composable
 private fun CategoriesShadow() {
     Divider(
         modifier = Modifier
             .shadow(
                 elevation = 12.dp,
-                spotColor = CustomDarkGrey,
-                ambientColor = CustomDarkGrey
+                spotColor = MaterialTheme.colorScheme.primary,
+                ambientColor = MaterialTheme.colorScheme.primary
             ),
         thickness = 0.dp,
     )
@@ -240,6 +246,7 @@ fun MenuItem(
                 modifier = Modifier.weight(1f),
                 text = product.description,
                 style = Typography.bodyMedium,
+                overflow = TextOverflow.Ellipsis,
                 color = MaterialTheme.colorScheme.secondary
             )
             OutlinedButton(
