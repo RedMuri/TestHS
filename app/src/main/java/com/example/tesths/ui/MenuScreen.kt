@@ -1,4 +1,4 @@
-package com.example.tesths
+package com.example.tesths.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -20,11 +20,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,55 +35,74 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.tesths.R
+import com.example.tesths.ui.theme.CustomDarkGrey
 import com.example.tesths.ui.theme.CustomLightRed
 import com.example.tesths.ui.theme.CustomRed
 import com.example.tesths.ui.theme.Typography
-
-@Preview
-@Composable
-private fun Preview() {
-    MenuScreenRoute()
-}
-
-@Composable
-fun MenuScreenRoute() {
-
-    MenuScreen()
-}
 
 private val categories = listOf("Пицца", "Комбо", "Десерты", "Напитки")
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MenuScreen() {
-    var selectedCategory = remember {
+fun MenuScreen(
+    paddingValues: PaddingValues,
+) {
+    val selectedCategory = remember {
         mutableStateOf(categories[0])
+    }
+    var categoriesShadowVisible by remember {
+        mutableStateOf(false)
+    }
+    val bannersScrollState = rememberLazyListState()
+    val menuScrollState = rememberLazyListState()
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                categoriesShadowVisible =
+                    menuScrollState.canScrollBackward && menuScrollState.layoutInfo.visibleItemsInfo[0].offset == 0
+                return Offset.Zero
+            }
+        }
     }
 
     Column(
-        Modifier.background(MaterialTheme.colorScheme.background)
+        Modifier
+            .padding(paddingValues)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Headline()
 
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .nestedScroll(nestedScrollConnection),
+            state = menuScrollState
         ) {
             item {
-                Banners()
+                Banners(bannersScrollState)
 
                 Spacer(modifier = Modifier.height(8.dp))
             }
             stickyHeader {
-                Categories(categories,selectedCategory)
+                Categories(categories, selectedCategory)
+                if (categoriesShadowVisible) {
+                    CategoriesShadow()
+                }
             }
             repeat(5) {
                 item {
@@ -89,6 +111,19 @@ fun MenuScreen() {
             }
         }
     }
+}
+
+@Composable
+private fun CategoriesShadow() {
+    Divider(
+        modifier = Modifier
+            .shadow(
+                elevation = 12.dp,
+                spotColor = CustomDarkGrey,
+                ambientColor = CustomDarkGrey
+            ),
+        thickness = 0.dp,
+    )
 }
 
 @Composable
@@ -179,7 +214,7 @@ fun MenuItem() {
 @Composable
 private fun Categories(
     categories: List<String>,
-    selectedCategory: MutableState<String>
+    selectedCategory: MutableState<String>,
 ) {
     LazyRow(
         contentPadding = PaddingValues(16.dp),
@@ -226,11 +261,13 @@ fun CategoryItem(
 
 @Composable
 fun Banners(
+    scrollState: LazyListState,
 ) {
     Spacer(modifier = Modifier.height(16.dp))
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        state = scrollState
     ) {
         repeat(3) {
             item {
