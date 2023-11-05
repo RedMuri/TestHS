@@ -1,7 +1,5 @@
 package com.example.tesths.di
 
-import android.app.Application
-import com.example.macttestapp.di.ApplicationScope
 import com.example.tesths.data.RepositoryImpl
 import com.example.tesths.data.network.ApiFactory
 import com.example.tesths.data.network.ApiService
@@ -21,7 +19,7 @@ interface DataModule {
 
         @ApplicationScope
         @Provides
-        fun provideApiService(application: Application): ApiService {
+        fun provideApiService(): ApiService {
             return ApiFactory.apiService
         }
     }

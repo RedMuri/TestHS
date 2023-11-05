@@ -1,4 +1,4 @@
-package com.example.macttestapp.di
+package com.example.tesths.di
 
 import javax.inject.Scope
 

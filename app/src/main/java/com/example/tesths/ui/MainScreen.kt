@@ -33,12 +33,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.tesths.ui.navigation.NavigationItem
 import com.example.tesths.ui.navigation.SetupRootNavGraph
+import com.example.tesths.ui.screens.MenuScreen
 import com.example.tesths.ui.theme.CustomDarkGrey
 import com.example.tesths.ui.theme.CustomDarkWhite
 import com.example.tesths.ui.theme.CustomRed
 import com.example.tesths.ui.theme.Inter
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
 

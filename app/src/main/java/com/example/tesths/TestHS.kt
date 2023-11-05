@@ -1,7 +1,7 @@
 package com.example.tesths
 
 import android.app.Application
-import com.example.macttestapp.di.DaggerApplicationComponent
+import com.example.tesths.di.DaggerApplicationComponent
 
 class TestHS : Application() {
 

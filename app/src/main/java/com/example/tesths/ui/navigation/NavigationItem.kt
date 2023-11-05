@@ -3,7 +3,7 @@ package com.example.tesths.ui.navigation
 import com.example.tesths.R
 import javax.inject.Inject
 
-sealed class NavigationItem @Inject constructor(
+sealed class NavigationItem (
     val screen: Screen,
     val titleResId: Int,
     val iconResId: Int,

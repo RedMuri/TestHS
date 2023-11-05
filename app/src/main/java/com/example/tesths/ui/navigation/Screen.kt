@@ -1,8 +1,6 @@
 package com.example.tesths.ui.navigation
 
-import javax.inject.Inject
-
-sealed class Screen @Inject constructor(val route: String) {
+sealed class Screen (val route: String) {
     object Menu: Screen(ROUTE_MENU)
     object Profile : Screen(ROUTE_PROFILE)
     object Cart : Screen(ROUTE_CART)
