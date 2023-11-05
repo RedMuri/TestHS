@@ -1,4 +1,4 @@
-package com.example.tesths
+package com.example.tesths.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

@@ -1,4 +1,6 @@
-package com.example.tesths
+package com.example.tesths.ui.navigation
+
+import com.example.tesths.R
 
 sealed class NavigationItem(
     val screen: Screen,

@@ -1,4 +1,4 @@
-package com.example.tesths
+package com.example.tesths.ui.navigation
 
 sealed class Screen(val route: String) {
     object Menu: Screen(ROUTE_MENU)
