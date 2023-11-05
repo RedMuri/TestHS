@@ -2,6 +2,9 @@ package com.example.tesths.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tesths.data.Mapper
+import com.example.tesths.data.RepositoryImpl
+import com.example.tesths.data.network.ApiFactory
 import com.example.tesths.domain.usecases.GetProductsUseCase
 import com.example.tesths.ui.state.ProductsScreenState
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -12,9 +15,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 
-class ProductsViewModel (
-    private val getProductsUseCase: GetProductsUseCase,
-) : ViewModel() {
+class ProductsViewModel () : ViewModel() {
+    val getProductsUseCase = GetProductsUseCase(RepositoryImpl(ApiFactory.apiService, Mapper()))
 
     private val _productsScreenState =
         MutableStateFlow<ProductsScreenState>(ProductsScreenState.Loading)

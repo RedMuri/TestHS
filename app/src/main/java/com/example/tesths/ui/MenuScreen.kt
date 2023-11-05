@@ -1,5 +1,6 @@
 package com.example.tesths.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -27,6 +28,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,7 +36,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,13 +51,19 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tesths.R
+import com.example.tesths.domain.model.Product
+import com.example.tesths.ui.state.ProductsScreenState
 import com.example.tesths.ui.theme.CustomDarkGrey
 import com.example.tesths.ui.theme.CustomLightRed
 import com.example.tesths.ui.theme.CustomRed
 import com.example.tesths.ui.theme.Typography
+import com.example.tesths.ui.viewmodel.ProductsViewModel
 
 private val categories = listOf("Пицца", "Комбо", "Десерты", "Напитки")
 
@@ -62,6 +72,12 @@ private val categories = listOf("Пицца", "Комбо", "Десерты", "�
 fun MenuScreen(
     paddingValues: PaddingValues,
 ) {
+    val viewModel: ProductsViewModel = viewModel()
+
+    LaunchedEffect(key1 = Unit){
+        viewModel.getProducts()
+    }
+
     val selectedCategory = remember {
         mutableStateOf(categories[0])
     }
@@ -79,36 +95,56 @@ fun MenuScreen(
             }
         }
     }
-
-    Column(
-        Modifier
-            .padding(paddingValues)
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        Headline()
-
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(nestedScrollConnection),
-            state = menuScrollState
-        ) {
-            item {
-                Banners(bannersScrollState)
-
-                Spacer(modifier = Modifier.height(8.dp))
+    val context = LocalContext.current
+    val state = viewModel.productsScreenState.collectAsState()
+    when (val currentState = state.value){
+        is ProductsScreenState.Loading ->{
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(LocalConfiguration.current.screenHeightDp.dp)
+                    .background(color = MaterialTheme.colorScheme.surface)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(
+                        Alignment.Center
+                    )
+                )
             }
-            stickyHeader {
-                Categories(categories, selectedCategory)
-                if (categoriesShadowVisible) {
-                    CategoriesShadow()
+        }
+        is ProductsScreenState.Content -> {
+            Column(
+                Modifier
+                    .padding(paddingValues)
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
+                Headline()
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .nestedScroll(nestedScrollConnection),
+                    state = menuScrollState
+                ) {
+                    item {
+                        Banners(bannersScrollState)
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    stickyHeader {
+                        Categories(categories, selectedCategory)
+                        if (categoriesShadowVisible) {
+                            CategoriesShadow()
+                        }
+                    }
+                    items(currentState.products){
+                        MenuItem(it)
+                    }
                 }
             }
-            repeat(5) {
-                item {
-                    MenuItem()
-                }
-            }
+        }
+        is ProductsScreenState.Error -> {
+            Toast.makeText(context, "error: ${currentState.error}", Toast.LENGTH_SHORT).show()
         }
     }
 }
@@ -160,7 +196,9 @@ private fun Headline() {
 }
 
 @Composable
-fun MenuItem() {
+fun MenuItem(
+    product: Product
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -186,13 +224,13 @@ fun MenuItem() {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "item",
+                text = product.title,
                 style = Typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
                 modifier = Modifier.weight(1f),
-                text = "item",
+                text = product.description,
                 style = Typography.bodyMedium,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -202,7 +240,7 @@ fun MenuItem() {
                 border = BorderStroke(1.dp, CustomRed),
                 onClick = { }) {
                 Text(
-                    text = "item",
+                    text = product.price.toString(),
                     style = Typography.bodySmall,
                     color = CustomRed
                 )
