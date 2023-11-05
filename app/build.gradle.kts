@@ -62,6 +62,9 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.androidx.navigation.compose)
 
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
