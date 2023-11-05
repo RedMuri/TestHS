@@ -17,9 +17,13 @@ compose-bom = "2023.10.01"
 logging-interceptor = "4.10.0"
 navigation-compose = "2.7.5"
 dagger = "2.48.1"
+roomRuntime = "2.6.0"
 
 [libraries]
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation-compose" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 artifactId = { module = "groupId:artifactId", version.ref = "artifactId" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil-compose" }
 com-google-devtools-ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "comGoogleDevtoolsKspGradlePlugin" }
