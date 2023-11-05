@@ -1,13 +1,14 @@
-package com.example.tesths
+package com.example.tesths.ui
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -18,9 +19,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,33 +31,36 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.tesths.ui.navigation.NavigationItem
+import com.example.tesths.ui.navigation.SetupRootNavGraph
+import com.example.tesths.ui.theme.CustomDarkGrey
+import com.example.tesths.ui.theme.CustomDarkWhite
 import com.example.tesths.ui.theme.CustomRed
 import com.example.tesths.ui.theme.Inter
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
 
     val navController = rememberNavController()
-    val context = LocalContext.current
     val bottomBarState = rememberSaveable { (mutableStateOf(true)) }
 
     Scaffold(bottomBar = {
         BottomBar(
             navController = navController, bottomBarState = bottomBarState
         )
-    }) {
-        SetupRootNavGraph(navController = navController,
-            menuScreenContent = {
-                MenuScreenRoute()
-            },
-            profileScreenContent = {
+    }) { paddingValues ->
+        SetupRootNavGraph(navController = navController, menuScreenContent = {
+            MenuScreen(paddingValues)
+        }, profileScreenContent = {
+            Box(modifier = Modifier.padding(paddingValues).fillMaxSize(), contentAlignment = Alignment.Center){
                 Text(text = "Profile")
-            },
-            cartScreenContent = {
+            }
+        }, cartScreenContent = {
+            Box(modifier = Modifier.padding(paddingValues).fillMaxSize(), contentAlignment = Alignment.Center){
                 Text(text = "Cart")
-            })
+            }
+        })
     }
 }
 
@@ -67,11 +71,10 @@ private fun BottomBar(navController: NavHostController, bottomBarState: MutableS
         exit = slideOutVertically(targetOffsetY = { it }),
         content = {
             NavigationBar(
-                containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.primary,
+                containerColor = CustomDarkWhite,
                 modifier = Modifier
                     .shadow(elevation = 8.dp)
-                    .height(75.dp)
+                    .height(74.dp)
             ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
 
@@ -105,14 +108,14 @@ private fun BottomBar(navController: NavHostController, bottomBarState: MutableS
                         Text(
                             text = stringResource(item.titleResId),
                             fontFamily = Inter,
+                            color = if (selected) CustomRed else CustomDarkGrey,
                             fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal
                         )
                     }, colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = CustomRed,
-                        unselectedIconColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.background
+                        unselectedIconColor = CustomDarkGrey,
+                        indicatorColor = CustomDarkWhite
                     )
-
                     )
                 }
             }
