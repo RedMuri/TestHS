@@ -1,9 +1,9 @@
 package com.example.tesths.domain
 
-import com.example.tesths.domain.model.Product
+import com.example.tesths.ui.state.ProductsScreenState
 import kotlinx.coroutines.flow.Flow
 
 interface Repository {
 
-    fun getProducts(skip: Int,limit: Int): Flow<List<Product>>
+    fun getProducts(skip: Int,limit: Int): Flow<ProductsScreenState>
 }
