@@ -8,8 +8,8 @@ interface ApiService {
 
     @GET("products")
     suspend fun getProducts(
-        @Query(QUERY_PARAM_SKIP) skip: Int,
-        @Query(QUERY_PARAM_LIMIT) limit: Int,
+        @Query(QUERY_PARAM_SKIP) skip: Int = 0,
+        @Query(QUERY_PARAM_LIMIT) limit: Int = 40,
     ): ProductsResponseDto
 
     companion object {

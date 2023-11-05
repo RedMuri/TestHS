@@ -15,9 +15,9 @@ class RepositoryImpl @Inject constructor(
     private val mapper: Mapper,
 ) : Repository {
 
-    override fun getProducts(skip: Int, limit: Int): Flow<ProductsScreenState> = flow {
+    override fun getProducts(): Flow<ProductsScreenState> = flow {
         try {
-            val response = apiService.getProducts(0, limit)
+            val response = apiService.getProducts()
             val productsDto = response.products
             val productsDbModel = productsDto.map { mapper.mapProductDtoToDbModel(it) }
             productDao.deleteAllProducts()

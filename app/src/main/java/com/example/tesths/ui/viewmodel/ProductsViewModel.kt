@@ -18,18 +18,19 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class ProductsViewModel @Inject constructor(
-    val getProductsUseCase: GetProductsUseCase
+    val getProductsUseCase: GetProductsUseCase,
 ) : ViewModel() {
 
     private val _productsScreenState =
         MutableStateFlow<ProductsScreenState>(ProductsScreenState.Loading)
     val productsScreenState = _productsScreenState.asStateFlow()
 
-    fun getProducts(skip: Int = 0, limit: Int = 10) {
+    fun getProducts(shouldUpdate: Boolean = false) {
         viewModelScope.launch {
-            getProductsUseCase(skip, limit)
+            getProductsUseCase()
                 .onStart {
-                    _productsScreenState.emit(ProductsScreenState.Loading)
+                    if (shouldUpdate)
+                        _productsScreenState.emit(ProductsScreenState.Loading)
                 }
                 .collect {
                     _productsScreenState.emit(it as ProductsScreenState)

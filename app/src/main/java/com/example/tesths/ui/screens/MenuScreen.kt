@@ -48,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,11 +75,11 @@ import com.example.tesths.ui.theme.CustomRed
 import com.example.tesths.ui.theme.CustomWhite
 import com.example.tesths.ui.theme.Typography
 import com.example.tesths.ui.viewmodel.ProductsViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 private val categories = listOf("Пицца", "Комбо", "Десерты", "Напитки")
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MenuScreen(
     paddingValues: PaddingValues,
@@ -95,20 +96,26 @@ fun MenuScreen(
         viewModel.getProducts()
     }
 
-    val selectedCategory = remember {
+    val selectedCategory = rememberSaveable {
         mutableStateOf(categories[0])
     }
-    var categoriesShadowVisible by remember {
+    var categoriesShadowVisible by rememberSaveable {
         mutableStateOf(false)
     }
 
-    val bannersScrollState = rememberLazyListState()
+    val categoriesScrollState = rememberLazyListState()
     val menuScrollState = rememberLazyListState()
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 categoriesShadowVisible =
                     menuScrollState.canScrollBackward && menuScrollState.layoutInfo.visibleItemsInfo[0].offset == 0
+                when (menuScrollState.firstVisibleItemIndex) {
+                    0, 9 -> selectedCategory.value = categories[0]
+                    10, 19 -> selectedCategory.value = categories[1]
+                    20, 29 -> selectedCategory.value = categories[2]
+                    30 -> selectedCategory.value = categories[3]
+                }
                 return Offset.Zero
             }
         }
@@ -130,12 +137,13 @@ fun MenuScreen(
 
                 is ProductsScreenState.Content -> {
                     MenuContent(
-                        nestedScrollConnection,
-                        menuScrollState,
-                        bannersScrollState,
-                        selectedCategory,
-                        categoriesShadowVisible,
-                        currentState.products
+                        nestedScrollConnection = nestedScrollConnection,
+                        menuScrollState = menuScrollState,
+                        categoriesScrollState = categoriesScrollState,
+                        selectedCategory = selectedCategory,
+                        categoriesShadowVisible = categoriesShadowVisible,
+                        scope = scope,
+                        products = currentState.products
                     )
                 }
 
@@ -153,17 +161,18 @@ fun MenuScreen(
                                 duration = SnackbarDuration.Indefinite
                             )
                             if (snackBarResult == SnackbarResult.ActionPerformed) {
-                                viewModel.getProducts()
+                                viewModel.getProducts(true)
                             }
                         }
                     }
                     MenuContent(
-                        nestedScrollConnection,
-                        menuScrollState,
-                        bannersScrollState,
-                        selectedCategory,
-                        categoriesShadowVisible,
-                        currentState.products
+                        nestedScrollConnection = nestedScrollConnection,
+                        menuScrollState = menuScrollState,
+                        categoriesScrollState = categoriesScrollState,
+                        selectedCategory = selectedCategory,
+                        categoriesShadowVisible = categoriesShadowVisible,
+                        scope = scope,
+                        products = currentState.products
                     )
                 }
             }
@@ -190,9 +199,10 @@ fun MenuScreen(
 private fun MenuContent(
     nestedScrollConnection: NestedScrollConnection,
     menuScrollState: LazyListState,
-    bannersScrollState: LazyListState,
+    categoriesScrollState: LazyListState,
     selectedCategory: MutableState<String>,
     categoriesShadowVisible: Boolean,
+    scope: CoroutineScope,
     products: List<Product>,
 ) {
     LazyColumn(
@@ -202,12 +212,23 @@ private fun MenuContent(
         state = menuScrollState
     ) {
         item {
-            Banners(bannersScrollState)
+            Banners()
 
             Spacer(modifier = Modifier.height(8.dp))
         }
         stickyHeader {
-            Categories(categories, selectedCategory)
+            Categories(categories, selectedCategory, categoriesScrollState){
+                selectedCategory.value = it
+                scope.launch {
+                    val itemIndex = when(it){
+                        categories[0] -> 0
+                        categories[1] -> 11
+                        categories[2] -> 21
+                        else -> 31
+                    }
+                    menuScrollState.scrollToItem(itemIndex,-categoriesScrollState.layoutInfo.viewportSize.height)
+                }
+            }
             if (categoriesShadowVisible) {
                 CategoriesShadow()
             }
@@ -358,20 +379,22 @@ fun MenuItem(
 private fun Categories(
     categories: List<String>,
     selectedCategory: MutableState<String>,
-) {
+    categoriesScrollState: LazyListState,
+    onCategoryClick: (String) -> Unit, ) {
     LazyRow(
         contentPadding = PaddingValues(16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.background),
+        state = categoriesScrollState
     ) {
         items(categories) { category ->
             CategoryItem(
                 category = category,
                 isSelected = category == selectedCategory.value
             ) {
-                selectedCategory.value = it
+                onCategoryClick(category)
             }
         }
     }
@@ -403,14 +426,11 @@ fun CategoryItem(
 
 
 @Composable
-fun Banners(
-    scrollState: LazyListState,
-) {
+fun Banners() {
     Spacer(modifier = Modifier.height(16.dp))
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        state = scrollState
     ) {
         repeat(3) {
             item {

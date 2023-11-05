@@ -5,5 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface Repository {
 
-    fun getProducts(skip: Int,limit: Int): Flow<ProductsScreenState>
+    fun getProducts(): Flow<ProductsScreenState>
 }
