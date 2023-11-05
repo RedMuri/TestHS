@@ -1,8 +1,9 @@
 package com.example.tesths.ui.navigation
 
 import com.example.tesths.R
+import javax.inject.Inject
 
-sealed class NavigationItem(
+sealed class NavigationItem @Inject constructor(
     val screen: Screen,
     val titleResId: Int,
     val iconResId: Int,

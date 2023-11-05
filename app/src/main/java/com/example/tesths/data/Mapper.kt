@@ -2,8 +2,9 @@ package com.example.tesths.data
 
 import com.example.tesths.data.model.ProductDto
 import com.example.tesths.domain.model.Product
+import javax.inject.Inject
 
-class Mapper{
+class Mapper @Inject constructor(){
 
     fun mapProductDtoToEntity(productDto: ProductDto) = Product(
         id = productDto.id,

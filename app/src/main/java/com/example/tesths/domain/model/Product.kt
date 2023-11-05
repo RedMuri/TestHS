@@ -1,7 +1,9 @@
 package com.example.tesths.domain.model
 
+import javax.inject.Inject
 
-data class Product(
+
+data class Product @Inject constructor(
     val id: Int,
     val title: String,
     val price: Int,

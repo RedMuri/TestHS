@@ -5,8 +5,9 @@ import com.example.tesths.domain.model.Product
 import com.example.tesths.domain.Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
-class RepositoryImpl (
+class RepositoryImpl @Inject constructor(
     private val apiService: ApiService,
     private val mapper: Mapper,
 ) : Repository {
