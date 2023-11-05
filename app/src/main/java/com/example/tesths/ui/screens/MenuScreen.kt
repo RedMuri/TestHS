@@ -3,6 +3,7 @@ package com.example.tesths.ui.screens
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -79,6 +80,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 private val categories = listOf("Пицца", "Комбо", "Десерты", "Напитки")
+private val banners = listOf(R.drawable.banner_1, R.drawable.banner_2)
 
 @Composable
 fun MenuScreen(
@@ -212,21 +214,24 @@ private fun MenuContent(
         state = menuScrollState
     ) {
         item {
-            Banners()
+            Banners(banners)
 
             Spacer(modifier = Modifier.height(8.dp))
         }
         stickyHeader {
-            Categories(categories, selectedCategory, categoriesScrollState){
+            Categories(categories, selectedCategory, categoriesScrollState) {
                 selectedCategory.value = it
                 scope.launch {
-                    val itemIndex = when(it){
+                    val itemIndex = when (it) {
                         categories[0] -> 0
                         categories[1] -> 11
                         categories[2] -> 21
                         else -> 31
                     }
-                    menuScrollState.scrollToItem(itemIndex,-categoriesScrollState.layoutInfo.viewportSize.height)
+                    menuScrollState.scrollToItem(
+                        itemIndex,
+                        -categoriesScrollState.layoutInfo.viewportSize.height
+                    )
                 }
             }
             if (categoriesShadowVisible) {
@@ -380,7 +385,8 @@ private fun Categories(
     categories: List<String>,
     selectedCategory: MutableState<String>,
     categoriesScrollState: LazyListState,
-    onCategoryClick: (String) -> Unit, ) {
+    onCategoryClick: (String) -> Unit,
+) {
     LazyRow(
         contentPadding = PaddingValues(16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -426,29 +432,37 @@ fun CategoryItem(
 
 
 @Composable
-fun Banners() {
+fun Banners(
+    banners: List<Int>,
+) {
     Spacer(modifier = Modifier.height(16.dp))
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        repeat(3) {
-            item {
-                BannerItem()
-            }
+        items(banners) {
+            BannerItem(it)
         }
     }
 }
 
 @Composable
-private fun BannerItem() {
+private fun BannerItem(
+    bannerImageResId: Int,
+) {
     Box(
         modifier = Modifier
             .width(300.dp)
             .height(112.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(CustomRed)
-    )
+    ) {
+        Image(
+            painter = painterResource(id = bannerImageResId),
+            contentScale = ContentScale.Crop,
+            contentDescription = "Banner image"
+        )
+    }
 }
 
 @Composable
