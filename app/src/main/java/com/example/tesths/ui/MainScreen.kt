@@ -72,6 +72,7 @@ private fun BottomBar(navController: NavHostController, bottomBarState: MutableS
         content = {
             NavigationBar(
                 containerColor = CustomDarkWhite,
+                contentColor = CustomDarkWhite,
                 modifier = Modifier
                     .shadow(elevation = 8.dp)
                     .height(74.dp)
