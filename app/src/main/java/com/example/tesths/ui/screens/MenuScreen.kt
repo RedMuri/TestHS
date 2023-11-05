@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,6 +26,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -71,6 +73,7 @@ import com.example.tesths.R
 import com.example.tesths.domain.model.Product
 import com.example.tesths.ui.MainActivity
 import com.example.tesths.ui.state.ProductsScreenState
+import com.example.tesths.ui.theme.CustomDarkWhite
 import com.example.tesths.ui.theme.CustomLightRed
 import com.example.tesths.ui.theme.CustomRed
 import com.example.tesths.ui.theme.CustomWhite
@@ -179,19 +182,24 @@ fun MenuScreen(
                 }
             }
         }
-        SnackbarHost(
-            hostState = snackBarHostState,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-        ) {
-            Snackbar(
-                snackbarData = it,
-                containerColor = CustomRed,
-                contentColor = CustomWhite,
-                actionColor = CustomWhite
-            )
-        }
+        NoInternetConnectionSnackBar(snackBarHostState)
+    }
+}
+
+@Composable
+private fun BoxScope.NoInternetConnectionSnackBar(snackBarHostState: SnackbarHostState) {
+    SnackbarHost(
+        hostState = snackBarHostState,
+        modifier = Modifier.Companion
+            .align(Alignment.BottomCenter)
+            .fillMaxWidth()
+    ) {
+        Snackbar(
+            snackbarData = it,
+            containerColor = CustomRed,
+            contentColor = CustomWhite,
+            actionColor = CustomWhite
+        )
     }
 }
 
@@ -264,6 +272,11 @@ private fun LoadingPlaceholder() {
 private fun CategoriesShadow() {
     Divider(
         modifier = Modifier
+            .clip(GenericShape { size, _ ->
+                lineTo(size.width, 0f)
+                lineTo(size.width, Float.MAX_VALUE)
+                lineTo(0f, Float.MAX_VALUE)
+            })
             .shadow(
                 elevation = 12.dp,
                 spotColor = MaterialTheme.colorScheme.primary,
@@ -331,22 +344,7 @@ fun MenuItem(
             model = product.image,
             contentScale = ContentScale.Crop,
             loading = { ImageLoadingPlaceholder() },
-            error = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = MaterialTheme.colorScheme.tertiary)
-                ) {
-                    Icon(
-                        modifier = Modifier.align(
-                            Alignment.Center
-                        ),
-                        painter = painterResource(id = R.drawable.ic_bottom_menu),
-                        tint = MaterialTheme.colorScheme.secondary,
-                        contentDescription = "Product image placeholder"
-                    )
-                }
-            },
+            error = { ImageErrorPlaceholder() },
             contentDescription = "Item image"
         )
         Column(
@@ -371,12 +369,30 @@ fun MenuItem(
                 border = BorderStroke(1.dp, CustomRed),
                 onClick = { }) {
                 Text(
-                    text = product.price.toString(),
+                    text = String.format("от %d$", product.price),
                     style = Typography.bodySmall,
                     color = CustomRed
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun ImageErrorPlaceholder() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = CustomDarkWhite)
+    ) {
+        Icon(
+            modifier = Modifier.align(
+                Alignment.Center
+            ),
+            painter = painterResource(id = R.drawable.ic_bottom_menu),
+            tint = MaterialTheme.colorScheme.secondary,
+            contentDescription = "Product image placeholder"
+        )
     }
 }
 
@@ -470,7 +486,7 @@ fun ImageLoadingPlaceholder() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.tertiary)
+            .background(color = CustomDarkWhite)
     ) {
         CircularProgressIndicator(
             modifier = Modifier.align(
