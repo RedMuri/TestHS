@@ -1,9 +1,8 @@
-package com.example.tesths.ui
+package com.example.tesths.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -61,8 +60,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.SubcomposeAsyncImage
 import com.example.tesths.R
 import com.example.tesths.domain.model.Product
+import com.example.tesths.ui.MainActivity
 import com.example.tesths.ui.state.ProductsScreenState
-import com.example.tesths.ui.theme.CustomDarkGrey
 import com.example.tesths.ui.theme.CustomLightRed
 import com.example.tesths.ui.theme.CustomRed
 import com.example.tesths.ui.theme.Typography
@@ -75,7 +74,13 @@ private val categories = listOf("Пицца", "Комбо", "Десерты", "�
 fun MenuScreen(
     paddingValues: PaddingValues,
 ) {
-    val viewModel: ProductsViewModel = viewModel()
+    val context = LocalContext.current
+
+    val viewModel: ProductsViewModel = viewModel(
+        factory = (LocalContext.current as MainActivity).viewModelFactory
+    )
+
+    val state = viewModel.productsScreenState.collectAsState()
 
     LaunchedEffect(key1 = Unit) {
         viewModel.getProducts()
@@ -98,8 +103,6 @@ fun MenuScreen(
             }
         }
     }
-    val context = LocalContext.current
-    val state = viewModel.productsScreenState.collectAsState()
 
     Column(
         Modifier

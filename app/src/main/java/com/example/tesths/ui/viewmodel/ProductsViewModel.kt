@@ -14,9 +14,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ProductsViewModel () : ViewModel() {
-    val getProductsUseCase = GetProductsUseCase(RepositoryImpl(ApiFactory.apiService, Mapper()))
+class ProductsViewModel @Inject constructor(
+    val getProductsUseCase: GetProductsUseCase
+) : ViewModel() {
 
     private val _productsScreenState =
         MutableStateFlow<ProductsScreenState>(ProductsScreenState.Loading)
