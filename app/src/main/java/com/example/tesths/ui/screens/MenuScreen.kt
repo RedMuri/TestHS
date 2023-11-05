@@ -33,14 +33,21 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,8 +71,10 @@ import com.example.tesths.ui.MainActivity
 import com.example.tesths.ui.state.ProductsScreenState
 import com.example.tesths.ui.theme.CustomLightRed
 import com.example.tesths.ui.theme.CustomRed
+import com.example.tesths.ui.theme.CustomWhite
 import com.example.tesths.ui.theme.Typography
 import com.example.tesths.ui.viewmodel.ProductsViewModel
+import kotlinx.coroutines.launch
 
 private val categories = listOf("Пицца", "Комбо", "Десерты", "Напитки")
 
@@ -92,6 +101,7 @@ fun MenuScreen(
     var categoriesShadowVisible by remember {
         mutableStateOf(false)
     }
+
     val bannersScrollState = rememberLazyListState()
     val menuScrollState = rememberLazyListState()
     val nestedScrollConnection = remember {
@@ -103,46 +113,107 @@ fun MenuScreen(
             }
         }
     }
+    val snackBarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    Column(
+    Box(
         Modifier
             .padding(paddingValues)
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Headline()
-        when (val currentState = state.value) {
-            is ProductsScreenState.Loading -> {
-                LoadingPlaceholder()
-            }
+        Column {
+            Headline()
+            when (val currentState = state.value) {
+                is ProductsScreenState.Loading -> {
+                    LoadingPlaceholder()
+                }
 
-            is ProductsScreenState.Content -> {
+                is ProductsScreenState.Content -> {
+                    MenuContent(
+                        nestedScrollConnection,
+                        menuScrollState,
+                        bannersScrollState,
+                        selectedCategory,
+                        categoriesShadowVisible,
+                        currentState.products
+                    )
+                }
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .nestedScroll(nestedScrollConnection),
-                    state = menuScrollState
-                ) {
-                    item {
-                        Banners(bannersScrollState)
+                is ProductsScreenState.Error -> {
+                    Toast.makeText(context, "error: ${currentState.error}", Toast.LENGTH_SHORT)
+                        .show()
+                }
 
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                    stickyHeader {
-                        Categories(categories, selectedCategory)
-                        if (categoriesShadowVisible) {
-                            CategoriesShadow()
+                is ProductsScreenState.InternetError -> {
+                    SideEffect {
+                        scope.launch {
+                            val snackBarResult = snackBarHostState.showSnackbar(
+                                message = "Нет интернет-подключения",
+                                actionLabel = "Обновить",
+                                duration = SnackbarDuration.Indefinite
+                            )
+                            if (snackBarResult == SnackbarResult.ActionPerformed) {
+                                viewModel.getProducts()
+                            }
                         }
                     }
-                    items(currentState.products) {
-                        MenuItem(it)
-                    }
+                    MenuContent(
+                        nestedScrollConnection,
+                        menuScrollState,
+                        bannersScrollState,
+                        selectedCategory,
+                        categoriesShadowVisible,
+                        currentState.products
+                    )
                 }
             }
+        }
+        SnackbarHost(
+            hostState = snackBarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+        ) {
+            Snackbar(
+                snackbarData = it,
+                containerColor = CustomRed,
+                contentColor = CustomWhite,
+                actionColor = CustomWhite
+            )
+        }
+    }
+}
 
-            is ProductsScreenState.Error -> {
-                Toast.makeText(context, "error: ${currentState.error}", Toast.LENGTH_SHORT).show()
+
+@Composable
+@OptIn(ExperimentalFoundationApi::class)
+private fun MenuContent(
+    nestedScrollConnection: NestedScrollConnection,
+    menuScrollState: LazyListState,
+    bannersScrollState: LazyListState,
+    selectedCategory: MutableState<String>,
+    categoriesShadowVisible: Boolean,
+    products: List<Product>,
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(nestedScrollConnection),
+        state = menuScrollState
+    ) {
+        item {
+            Banners(bannersScrollState)
+
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+        stickyHeader {
+            Categories(categories, selectedCategory)
+            if (categoriesShadowVisible) {
+                CategoriesShadow()
             }
+        }
+        items(products) {
+            MenuItem(it)
         }
     }
 }
@@ -234,6 +305,22 @@ fun MenuItem(
             model = product.image,
             contentScale = ContentScale.Crop,
             loading = { ImageLoadingPlaceholder() },
+            error = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color = MaterialTheme.colorScheme.tertiary)
+                ) {
+                    Icon(
+                        modifier = Modifier.align(
+                            Alignment.Center
+                        ),
+                        painter = painterResource(id = R.drawable.ic_bottom_menu),
+                        tint = MaterialTheme.colorScheme.secondary,
+                        contentDescription = "Product image placeholder"
+                    )
+                }
+            },
             contentDescription = "Item image"
         )
         Column(

@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,10 +28,11 @@ class ProductsViewModel @Inject constructor(
     fun getProducts(skip: Int = 0, limit: Int = 10) {
         viewModelScope.launch {
             getProductsUseCase(skip, limit)
-                .catch {
-                    _productsScreenState.emit(ProductsScreenState.Error(it))
-                }.collect {
-                    _productsScreenState.emit(ProductsScreenState.Content(it))
+                .onStart {
+                    _productsScreenState.emit(ProductsScreenState.Loading)
+                }
+                .collect {
+                    _productsScreenState.emit(it as ProductsScreenState)
                 }
         }
     }
