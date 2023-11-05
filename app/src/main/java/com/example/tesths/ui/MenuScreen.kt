@@ -51,11 +51,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.SubcomposeAsyncImage
 import com.example.tesths.R
 import com.example.tesths.domain.model.Product
 import com.example.tesths.ui.state.ProductsScreenState
@@ -74,7 +76,7 @@ fun MenuScreen(
 ) {
     val viewModel: ProductsViewModel = viewModel()
 
-    LaunchedEffect(key1 = Unit){
+    LaunchedEffect(key1 = Unit) {
         viewModel.getProducts()
     }
 
@@ -97,28 +99,30 @@ fun MenuScreen(
     }
     val context = LocalContext.current
     val state = viewModel.productsScreenState.collectAsState()
-    when (val currentState = state.value){
-        is ProductsScreenState.Loading ->{
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(LocalConfiguration.current.screenHeightDp.dp)
-                    .background(color = MaterialTheme.colorScheme.surface)
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(
-                        Alignment.Center
+
+    Column(
+        Modifier
+            .padding(paddingValues)
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Headline()
+        when (val currentState = state.value) {
+            is ProductsScreenState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(LocalConfiguration.current.screenHeightDp.dp)
+                        .background(color = MaterialTheme.colorScheme.surface)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(
+                            Alignment.Center
+                        )
                     )
-                )
+                }
             }
-        }
-        is ProductsScreenState.Content -> {
-            Column(
-                Modifier
-                    .padding(paddingValues)
-                    .background(MaterialTheme.colorScheme.background)
-            ) {
-                Headline()
+
+            is ProductsScreenState.Content -> {
 
                 LazyColumn(
                     modifier = Modifier
@@ -137,14 +141,15 @@ fun MenuScreen(
                             CategoriesShadow()
                         }
                     }
-                    items(currentState.products){
+                    items(currentState.products) {
                         MenuItem(it)
                     }
                 }
             }
-        }
-        is ProductsScreenState.Error -> {
-            Toast.makeText(context, "error: ${currentState.error}", Toast.LENGTH_SHORT).show()
+
+            is ProductsScreenState.Error -> {
+                Toast.makeText(context, "error: ${currentState.error}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
@@ -197,7 +202,7 @@ private fun Headline() {
 
 @Composable
 fun MenuItem(
-    product: Product
+    product: Product,
 ) {
     Box(
         modifier = Modifier
@@ -212,11 +217,14 @@ fun MenuItem(
             .height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(22.dp)
     ) {
-        Image(
+        SubcomposeAsyncImage(
             modifier = Modifier
                 .weight(0.48f)
-                .aspectRatio(1f),
-            painter = painterResource(id = R.drawable.ic_bottom_menu),
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(8.dp)),
+            model = product.image,
+            contentScale = ContentScale.Crop,
+            loading = { ImageLoadingPlaceholder() },
             contentDescription = "Item image"
         )
         Column(
@@ -324,4 +332,20 @@ private fun BannerItem() {
             .clip(RoundedCornerShape(10.dp))
             .background(CustomRed)
     )
+}
+
+@Composable
+fun ImageLoadingPlaceholder() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.tertiary)
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.align(
+                Alignment.Center
+            ),
+            color = MaterialTheme.colorScheme.secondary
+        )
+    }
 }
