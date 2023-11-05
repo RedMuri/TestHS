@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -36,6 +35,7 @@ import com.example.tesths.ui.navigation.SetupRootNavGraph
 import com.example.tesths.ui.screens.MenuScreen
 import com.example.tesths.ui.theme.CustomDarkGrey
 import com.example.tesths.ui.theme.CustomDarkWhite
+import com.example.tesths.ui.theme.CustomLightRed
 import com.example.tesths.ui.theme.CustomRed
 import com.example.tesths.ui.theme.Inter
 
