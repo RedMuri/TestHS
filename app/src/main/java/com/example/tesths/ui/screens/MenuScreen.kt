@@ -1,6 +1,8 @@
 package com.example.tesths.ui.screens
 
 import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -242,8 +244,14 @@ private fun MenuContent(
                     )
                 }
             }
+            val alphaShadowAnimation by animateFloatAsState(
+                targetValue = if (categoriesShadowVisible) 1f else 0f,
+                animationSpec = tween(
+                    durationMillis = 300
+                ), label = ""
+            )
             if (categoriesShadowVisible) {
-                CategoriesShadow()
+                CategoriesShadow(alphaShadowAnimation)
             }
         }
         items(products) {
@@ -269,7 +277,7 @@ private fun LoadingPlaceholder() {
 }
 
 @Composable
-private fun CategoriesShadow() {
+private fun CategoriesShadow(alphaShadowAnimation: Float) {
     Divider(
         modifier = Modifier
             .clip(GenericShape { size, _ ->
@@ -279,8 +287,8 @@ private fun CategoriesShadow() {
             })
             .shadow(
                 elevation = 12.dp,
-                spotColor = MaterialTheme.colorScheme.primary,
-                ambientColor = MaterialTheme.colorScheme.primary
+                spotColor = MaterialTheme.colorScheme.primary.copy(alphaShadowAnimation),
+                ambientColor = MaterialTheme.colorScheme.primary.copy(alphaShadowAnimation)
             ),
         thickness = 0.dp,
     )
