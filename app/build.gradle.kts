@@ -1,7 +1,10 @@
+import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
+
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -65,6 +68,9 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
     implementation(libs.coil.compose)
+
+    implementation(libs.com.google.devtools.ksp.gradle.plugin)
+    implementation(libs.dagger)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
